@@ -1,63 +1,119 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
-int solveTest(vector<vector<int>> &mat, int n, int m)
+bool check_M_minus_1(int n, int m, const vector<vector<int>> &a, int M, const vector<pair<int, int>> &critical_points)
 {
-    int maxVal = INT_MIN;
-    vector<pair<int, int>> maxPositions;
-    for (int i = 0; i < n; ++i)
-        for (int j = 0; j < m; ++j)
+    if (critical_points.empty())
+    {
+        return true;
+    }
+
+    int x0 = critical_points[0].first;
+    int y0 = critical_points[0].second;
+
+    int required_y = -1;
+    bool multiple_y_found = false;
+
+    for (const auto &p : critical_points)
+    {
+        if (p.first != x0)
         {
-            if (mat[i][j] > maxVal)
+            if (required_y == -1)
             {
-                maxVal = mat[i][j];
-                maxPositions.clear();
-                maxPositions.push_back(make_pair(i, j));
+                required_y = p.second;
             }
-            else if (mat[i][j] == maxVal)
+            else if (required_y != p.second)
             {
-                maxPositions.push_back(make_pair(i, j));
+                multiple_y_found = true;
+                break;
             }
         }
-    for (int r = 0; r < n; ++r)
+    }
+    if (!multiple_y_found)
     {
-        for (int c = 0; c < m; ++c)
+        return true;
+    }
+
+    int required_x = -1;
+    bool multiple_x_found = false;
+
+    for (const auto &p : critical_points)
+    {
+        if (p.second != y0)
         {
-            bool coversAll = true;
-            for (auto &p : maxPositions)
+            if (required_x == -1)
             {
-                int i = p.first, j = p.second;
-                if (i != r && j != c)
-                {
-                    coversAll = false;
-                    break;
-                }
+                required_x = p.first;
             }
-            if (coversAll)
-                return maxVal - 1;
+            else if (required_x != p.first)
+            {
+                multiple_x_found = true;
+                break;
+            }
+        }
+    }
+    if (!multiple_x_found)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+
+    vector<vector<int>> a(n, vector<int>(m));
+    int max_val = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            cin >> a[i][j];
+            if (a[i][j] > max_val)
+            {
+                max_val = a[i][j];
+            }
         }
     }
 
-    return maxVal;
+    vector<pair<int, int>> critical_points;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (a[i][j] == max_val)
+            {
+                critical_points.push_back({i, j});
+            }
+        }
+    }
+
+    if (check_M_minus_1(n, m, a, max_val, critical_points))
+    {
+        cout << max_val - 1 << endl;
+    }
+    else
+    {
+        cout << max_val << endl;
+    }
 }
 
 int main()
 {
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
 
     int t;
     cin >> t;
     while (t--)
     {
-        int n, m;
-        cin >> n >> m;
-        vector<vector<int>> mat(n, vector<int>(m));
-        for (int i = 0; i < n; ++i)
-            for (int j = 0; j < m; ++j)
-                cin >> mat[i][j];
-        cout << solveTest(mat, n, m) << '\n';
+        solve();
     }
     return 0;
 }
